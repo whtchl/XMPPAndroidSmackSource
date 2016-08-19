@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="D:\04_workspace\10_Openfire\04_androidXMPP\XMPP_Android\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.4.0\jars\libs\internal_impl-23.4.0.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="ea3c07504d2c8f4b13aa17c45c1b68ed9c1c3674">
+        <dex dex="D:\04_workspace\10_Openfire\04_androidXMPP\XMPP_Android\app\build\intermediates\transforms\dex\debug\folders\1000\10\internal_impl-23.4.0_b71ceb46d4d534a9d17c34e802067bb3d2a2127b\classes.dex" />
+    </item>
+    <item
+        jar="D:\Users\tchl\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\23.4.0\support-annotations-23.4.0.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="ffbe55fdb2bb456b1485831706a9eac3300bb6b8">
+        <dex dex="D:\04_workspace\10_Openfire\04_androidXMPP\XMPP_Android\app\build\intermediates\transforms\dex\debug\folders\1000\10\support-annotations-23.4.0_f95971b33314588eab68410d2caee9c876aa34f7\classes.dex" />
+    </item>
+    <item
+        jar="D:\04_workspace\10_Openfire\04_androidXMPP\XMPP_Android\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="6340aac59ba6b99ad0f2f78bbe641c8e9187a798">
+        <dex dex="D:\04_workspace\10_Openfire\04_androidXMPP\XMPP_Android\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run_7c759018416e952a1f8a8de4890f6bbeafbd7f57\classes.dex" />
+    </item>
+    <item
+        jar="D:\04_workspace\10_Openfire\04_androidXMPP\XMPP_Android\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="ec26ca8caedd6250ad28e9219466cfc3a1980375">
+        <dex dex="D:\04_workspace\10_Openfire\04_androidXMPP\XMPP_Android\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run-bootstrap_993e226d02865b5bf7be16cfde2a26ee5e3a3e40\classes.dex" />
+    </item>
+    <item
+        jar="D:\04_workspace\10_Openfire\04_androidXMPP\XMPP_Android\app\libs\nineoldandroids-2.4.0.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="59f19e43354d32de831379c23ce03bb259a4c2b7">
+        <dex dex="D:\04_workspace\10_Openfire\04_androidXMPP\XMPP_Android\app\build\intermediates\transforms\dex\debug\folders\1000\2\nineoldandroids-2.4.0_a3fe7f9ee8549a9fc905dd8fa933d551eca7c5af\classes.dex" />
+    </item>
+    <item
+        jar="D:\04_workspace\10_Openfire\04_androidXMPP\XMPP_Android\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.4.0\jars\classes.jar"
+        jumboMode="true"
+        revision="23.0.3"
+        sha1="67bd36ee9340ec7c254108936ad16b24bed160cc">
+        <dex dex="D:\04_workspace\10_Openfire\04_androidXMPP\XMPP_Android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-v4-23.4.0_28db4dbc3bac25fd308da8cc7f1583f8c28dbe9b\classes.dex" />
+    </item>
+
+</items>
