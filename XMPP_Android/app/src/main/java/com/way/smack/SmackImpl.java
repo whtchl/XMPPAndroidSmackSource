@@ -450,13 +450,13 @@ public class SmackImpl implements Smack {
 					L.i(String.format(
 							"Ping: server latency %1.3fs",
 							(System.currentTimeMillis() - mPingTimestamp) / 1000.));
+					L.i("mPingID:"+mPingID);
 					mPingID = null;
 					((AlarmManager) mService
 							.getSystemService(Context.ALARM_SERVICE))
 							.cancel(mPongTimeoutAlarmPendIntent);// 取消超时闹钟
 				}
 			}
-
 		};
 
 		mXMPPConnection.addPacketListener(mPongListener, new PacketTypeFilter(
@@ -475,12 +475,18 @@ public class SmackImpl implements Smack {
 		mService.registerReceiver(mPongTimeoutAlarmReceiver, new IntentFilter(
 				PONG_TIMEOUT_ALARM));// 注册连接超时广播接收者
 
-		((AlarmManager) mService.getSystemService(Context.ALARM_SERVICE))
+/*		((AlarmManager) mService.getSystemService(Context.ALARM_SERVICE))
 				.setInexactRepeating(AlarmManager.RTC_WAKEUP,
 						System.currentTimeMillis()
 								+ AlarmManager.INTERVAL_FIFTEEN_MINUTES,
 						AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-						mPingAlarmPendIntent);// 15分钟ping以此服务器
+						mPingAlarmPendIntent);// 15分钟ping以此服务器*/
+        ((AlarmManager) mService.getSystemService(Context.ALARM_SERVICE))
+                .setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                        System.currentTimeMillis()
+                                + 30000L,
+                        30000L,
+                        mPingAlarmPendIntent);;// 30sec ping以此服务器
 	}
 
 	/**

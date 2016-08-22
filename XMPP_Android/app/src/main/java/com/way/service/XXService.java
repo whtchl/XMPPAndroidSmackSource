@@ -133,7 +133,6 @@ public class XXService extends BaseService implements EventHandler,
 	@Override
 	public void onCreate() {
 		super.onCreate();
-
 		System.out.println(TAG+" ---> " + Thread.currentThread().getId());
 		XXBroadcastReceiver.mListeners.add(this);
 		BaseActivity.mListeners.add(this);
