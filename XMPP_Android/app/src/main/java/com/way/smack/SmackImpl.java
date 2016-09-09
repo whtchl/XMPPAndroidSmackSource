@@ -19,6 +19,7 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.IQ.Type;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Mode;
 import org.jivesoftware.smack.provider.ProviderManager;
@@ -31,6 +32,7 @@ import org.jivesoftware.smackx.forward.Forwarded;
 import org.jivesoftware.smackx.packet.DelayInfo;
 import org.jivesoftware.smackx.packet.DelayInformation;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
+import org.jivesoftware.smackx.packet.MessageEvent;
 import org.jivesoftware.smackx.ping.PingManager;
 import org.jivesoftware.smackx.ping.packet.Ping;
 import org.jivesoftware.smackx.ping.provider.PingProvider;
@@ -58,6 +60,7 @@ import com.way.db.RosterProvider;
 import com.way.db.RosterProvider.RosterConstants;
 import com.way.exception.XXException;
 import com.way.service.XXService;
+import com.way.util.DeliverConfirmMessage;
 import com.way.util.L;
 import com.way.util.PreferenceConstants;
 import com.way.util.PreferenceUtils;
@@ -65,6 +68,7 @@ import com.way.util.StatusMode;
 import com.way.xx.R;
 
 public class SmackImpl implements Smack {
+    public static final String TAG = "SmackImpl";
 	// 客户端名称和类型。主要是向服务器登记，有点类似QQ显示iphone或者Android手机在线的功能
 	public static final String XMPP_IDENTITY_NAME = "XMPP";// 客户端名称
 	public static final String XMPP_IDENTITY_TYPE = "phone";// 客户端类型
@@ -323,6 +327,11 @@ public class SmackImpl implements Smack {
 								chatMessage, ChatConstants.DS_NEW, ts,
 								msg.getPacketID());// 存入数据库，并标记为新消息DS_NEW
 						mService.newMessage(fromJID, chatMessage);// 通知service，处理是否需要显示通知栏，
+                        //tchl begin 20160907
+                        Log.d(TAG,"sendDevliverConfirmMessage: messageID:"+msg.getPacketID()+"  To:"+msg.getFrom()+"  from:"+msg.getTo());
+                        sendDevliverConfirmMessage(msg.getPacketID(),msg.getFrom(),msg.getTo());
+                        //tchl end 20190907
+
 					}
 				} catch (Exception e) {
 					// SMACK silently discards exceptions dropped from
@@ -945,6 +954,16 @@ public class SmackImpl implements Smack {
 		mRoster = mXMPPConnection.getRoster();
 		mRoster.createGroup(group);
 	}
+
+    private void sendDevliverConfirmMessage(String uuid,String toJID,String from){
+		Message msg = new Message(toJID);
+        msg.setFrom(from);
+		MessageEvent messageEvent = new MessageEvent();
+		messageEvent.setDelivered(true);
+		messageEvent.setPacketID(uuid);
+		msg.addExtension(messageEvent);
+		mXMPPConnection.sendPacket(msg);
+    }
 
 	@Override
 	public void sendMessage(String toJID, String message) {// 发送消息
