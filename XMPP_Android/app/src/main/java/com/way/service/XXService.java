@@ -1,5 +1,6 @@
 package com.way.service;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.way.activity.BaseActivity;
 import com.way.activity.BaseActivity.BackPressHandler;
@@ -69,6 +71,8 @@ public class XXService extends BaseService implements EventHandler,
 	private ActivityManager mActivityManager;
 	private HashSet<String> mIsBoundTo = new HashSet<String>();//用来保存当前正在聊天对象的数组
 
+    private final static int  mPatientCallNum = 69;
+    private Integer[] mWavIds = new Integer [mPatientCallNum];
 	/**
 	 * 注册注解面和聊天界面时连接状态变化回调
 	 * 
@@ -437,7 +441,8 @@ public class XXService extends BaseService implements EventHandler,
 			public void run() {
 				if (!PreferenceUtils.getPrefBoolean(XXService.this,
 						PreferenceConstants.SCLIENTNOTIFY, false))
-					MediaPlayer.create(XXService.this, R.raw.office).start();
+
+					MediaPlayer.create(XXService.this,PatientCall(message) ).start();
 				if (!isAppOnForeground())
 					notifyClient(from, mSmackable.getNameForJID(from), message,
 							!mIsBoundTo.contains(from));
@@ -584,4 +589,7 @@ public class XXService extends BaseService implements EventHandler,
 		L.i("activity onPause ...");
 		mMainHandler.postDelayed(monitorStatus, 1000L);
 	}
+    public int PatientCall(String message){
+        return getResources().getIdentifier("call"+message,"raw",this.getPackageName());
+    }
 }
