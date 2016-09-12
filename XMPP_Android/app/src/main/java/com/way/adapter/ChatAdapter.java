@@ -2,6 +2,7 @@ package com.way.adapter;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import com.way.db.ChatProvider;
 import com.way.db.ChatProvider.ChatConstants;
+import com.way.service.XXService;
 import com.way.util.L;
 import com.way.util.PreferenceConstants;
 import com.way.util.PreferenceUtils;
@@ -26,13 +28,14 @@ public class ChatAdapter extends SimpleCursorAdapter {
 	private static final int DELAY_NEWMSG = 2000;
 	private Context mContext;
 	private LayoutInflater mInflater;
-
+    Intent intent;
 	public ChatAdapter(Context context, Cursor cursor, String[] from) {
 		// super(context, android.R.layout.simple_list_item_1, cursor, from,
 		// to);
 		super(context, 0, cursor, from, null);
 		mContext = context;
 		mInflater = LayoutInflater.from(context);
+        intent  = new Intent();
 	}
 
 	@Override
@@ -102,6 +105,8 @@ public class ChatAdapter extends SimpleCursorAdapter {
 		ContentValues values = new ContentValues();
 		values.put(ChatConstants.DELIVERY_STATUS, ChatConstants.DS_SENT_OR_READ);
 		mContext.getContentResolver().update(rowuri, values, null, null);
+		intent.setAction(XXService.STOP_MEDIA);
+        mContext.sendBroadcast(intent);
 	}
 
 	private void bindViewData(ViewHolder holder, String date, boolean from_me,

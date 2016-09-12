@@ -1040,7 +1040,6 @@ public class SmackImpl implements Smack {
 			return false;
 		}
 		if (mXMPPConnection.isConnected()) {
-			// work around SMACK's #%&%# blocking disconnect()
 			new Thread() {
 				public void run() {
 					L.d("shutDown thread started");

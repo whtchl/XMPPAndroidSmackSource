@@ -73,6 +73,10 @@ public class XXService extends BaseService implements EventHandler,
 
     private final static int  mPatientCallNum = 69;
     private Integer[] mWavIds = new Integer [mPatientCallNum];
+
+	private MediaPlayer mediaPlayer;
+    private BroadcastReceiver mMediaPlayReceiver = new MediaReceiver();
+    public static final String STOP_MEDIA = "com.way.xx.STOP_MEDIA";
 	/**
 	 * 注册注解面和聊天界面时连接状态变化回调
 	 * 
@@ -144,6 +148,8 @@ public class XXService extends BaseService implements EventHandler,
 		mPAlarmIntent = PendingIntent.getBroadcast(this, 0, mAlarmIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		registerReceiver(mAlarmReceiver, new IntentFilter(RECONNECT_ALARM));
+        registerReceiver(mMediaPlayReceiver,new IntentFilter(STOP_MEDIA));
+
 	}
 
 	@Override
@@ -174,6 +180,7 @@ public class XXService extends BaseService implements EventHandler,
 		((AlarmManager) getSystemService(Context.ALARM_SERVICE))
 				.cancel(mPAlarmIntent);// 取消重连闹钟
 		unregisterReceiver(mAlarmReceiver);// 注销广播监听
+        unregisterReceiver(mMediaPlayReceiver);
 		logout();
 	}
 
@@ -442,8 +449,10 @@ public class XXService extends BaseService implements EventHandler,
 				if (!PreferenceUtils.getPrefBoolean(XXService.this,
 						PreferenceConstants.SCLIENTNOTIFY, false))
 
-					MediaPlayer.create(XXService.this,PatientCall(message) ).start();
-				if (!isAppOnForeground())
+					mediaPlayer = MediaPlayer.create(XXService.this,PatientCall(message) );
+                    mediaPlayer.setLooping(true);
+                    mediaPlayer.start();
+                if (!isAppOnForeground())
 					notifyClient(from, mSmackable.getNameForJID(from), message,
 							!mIsBoundTo.contains(from));
 				// T.showLong(XXService.this, from + ": " + message);
@@ -558,6 +567,15 @@ public class XXService extends BaseService implements EventHandler,
 		}
 	}
 
+    private class MediaReceiver extends BroadcastReceiver{
+        public void onReceive(Context ctx,Intent i){
+            L.d("Media received");
+            if(mediaPlayer!=null && mediaPlayer.isPlaying()){
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
+        }
+    }
 	@Override
 	public void onNetChange() {
 		if (NetUtil.getNetworkState(this) == NetUtil.NETWORN_NONE) {// 如果是网络断开，不作处理
