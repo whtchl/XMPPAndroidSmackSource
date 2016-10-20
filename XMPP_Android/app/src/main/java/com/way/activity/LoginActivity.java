@@ -174,11 +174,11 @@ public class LoginActivity extends FragmentActivity implements
 
 	public void onLoginClick(View v) {
 		mAccount = mAccountEt.getText().toString();
-		mAccount = "607@172.16.230.6";  //tchl 0817
+		//mAccount = "607@172.16.230.6";  //tchl 0817
 		mAccount = splitAndSaveServer(mAccount);
 		mPassword = mPasswordEt.getText().toString();
 		//tchl begin 0817
-		mPassword = "111111";
+		//mPassword = "111111";
 		//tchl end 0817
 		if (TextUtils.isEmpty(mAccount)) {
 			T.showShort(this, R.string.null_account_prompt);
