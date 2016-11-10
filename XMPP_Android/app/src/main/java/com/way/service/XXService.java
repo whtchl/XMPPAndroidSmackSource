@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.AlarmManager;
@@ -13,8 +16,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
@@ -29,6 +35,7 @@ import com.way.app.XXBroadcastReceiver;
 import com.way.app.XXBroadcastReceiver.EventHandler;
 import com.way.exception.XXException;
 import com.way.smack.SmackImpl;
+import com.way.sound.MediaManager;
 import com.way.util.L;
 import com.way.util.NetUtil;
 import com.way.util.PreferenceConstants;
@@ -77,6 +84,39 @@ public class XXService extends BaseService implements EventHandler,
 	private MediaPlayer mediaPlayer;
     private BroadcastReceiver mMediaPlayReceiver = new MediaReceiver();
     public static final String STOP_MEDIA = "com.way.xx.STOP_MEDIA";
+    android.os.Message msg = new android.os.Message();
+    Bundle data;
+    //tchl begin 1107
+    Context mContext;
+    public  Handler mSubHandler;
+    HandlerThread workHandle;
+    //tchl end 1107
+
+    private Handler.Callback mSubCallback = new Handler.Callback() {
+        //该接口的实现就是处理异步耗时任务的，因此该方法执行在子线程中
+        @Override
+        public boolean handleMessage(Message msg) {
+
+            switch (msg.what) {
+                case 0:
+                    Log.d(TAG,"mSubCallback thread:"+Thread.currentThread().getId());
+                    try {
+                        MediaManager.getInstance().playMutilSounds();
+                        //sThread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if(MediaManager.getInstance().isMediaManagerMapNull()){
+                        mSubHandler.sendEmptyMessage(0);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+            return false;
+        }
+    };
 	/**
 	 * 注册注解面和聊天界面时连接状态变化回调
 	 * 
@@ -149,6 +189,12 @@ public class XXService extends BaseService implements EventHandler,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		registerReceiver(mAlarmReceiver, new IntentFilter(RECONNECT_ALARM));
         registerReceiver(mMediaPlayReceiver,new IntentFilter(STOP_MEDIA));
+        mContext = this.getApplicationContext();
+        //tchl 1109 begin
+        MediaManager.getInstance().initSounds(mContext);
+        workHandle = new HandlerThread("workHandleThread");
+        workHandle.start();
+        //tchl 1109 end
 
 	}
 
@@ -443,24 +489,25 @@ public class XXService extends BaseService implements EventHandler,
 	}
 
 	// 收到新消息
-	public void newMessage(final String from, final String message) {
-		mMainHandler.post(new Runnable() {
-			public void run() {
-				if (!PreferenceUtils.getPrefBoolean(XXService.this,
-						PreferenceConstants.SCLIENTNOTIFY, false))
-
-					mediaPlayer = MediaPlayer.create(XXService.this,PatientCall(message) );
-                    mediaPlayer.setLooping(true);
-                    mediaPlayer.start();
+    public void newMessage(final String from, final String message) {
+        Log.d("thread", "thread:" + Thread.currentThread().getId() + "  name:" + Thread.currentThread().getName());
+        mMainHandler.post(new Runnable() {
+            public void run() {
+                if (!PreferenceUtils.getPrefBoolean(XXService.this,
+                        PreferenceConstants.SCLIENTNOTIFY, false))
+                    Log.d("thread", "XXService  thread:" + Thread.currentThread().getId());
                 if (!isAppOnForeground())
-					notifyClient(from, mSmackable.getNameForJID(from), message,
-							!mIsBoundTo.contains(from));
-				// T.showLong(XXService.this, from + ": " + message);
+                    notifyClient(from, mSmackable.getNameForJID(from), message,
+                            !mIsBoundTo.contains(from));
+            }
+        });
 
-			}
-
-		});
-	}
+        MediaManager.getInstance().addSound(message);
+        MediaManager.getInstance().PrintSound();
+        Log.d(TAG,"workhandle start");
+        mSubHandler = new Handler(workHandle.getLooper(), mSubCallback);
+        mSubHandler.sendEmptyMessage(0);
+    }
 
 	// 联系人改变
 	public void rosterChanged() {
@@ -567,34 +614,34 @@ public class XXService extends BaseService implements EventHandler,
 		}
 	}
 
-    private class MediaReceiver extends BroadcastReceiver{
-        public void onReceive(Context ctx,Intent i){
+    private class MediaReceiver extends BroadcastReceiver {
+        public void onReceive(Context ctx, Intent i) {
             L.d("Media received");
-            if(mediaPlayer!=null && mediaPlayer.isPlaying()){
-                mediaPlayer.stop();
-                mediaPlayer.release();
-            }
+            //tchl begin 1107
+            MediaManager.getInstance().cleanup();
+            //tchl end 1107
         }
     }
-	@Override
-	public void onNetChange() {
-		if (NetUtil.getNetworkState(this) == NetUtil.NETWORN_NONE) {// 如果是网络断开，不作处理
-			connectionFailed(NETWORK_ERROR);
-			return;
-		}
-		if (isAuthenticated())// 如果已经连接上，直接返回
-			return;
-		String account = PreferenceUtils.getPrefString(XXService.this,
-				PreferenceConstants.ACCOUNT, "");
-		String password = PreferenceUtils.getPrefString(XXService.this,
-				PreferenceConstants.PASSWORD, "");
-		if (TextUtils.isEmpty(account) || TextUtils.isEmpty(password))// 如果没有帐号，也直接返回
-			return;
-		if (!PreferenceUtils.getPrefBoolean(this,
-				PreferenceConstants.AUTO_RECONNECT, true))// 不需要重连
-			return;
-		Login(account, password);// 重连
-	}
+
+    @Override
+    public void onNetChange() {
+        if (NetUtil.getNetworkState(this) == NetUtil.NETWORN_NONE) {// 如果是网络断开，不作处理
+            connectionFailed(NETWORK_ERROR);
+            return;
+        }
+        if (isAuthenticated())// 如果已经连接上，直接返回
+            return;
+        String account = PreferenceUtils.getPrefString(XXService.this,
+                PreferenceConstants.ACCOUNT, "");
+        String password = PreferenceUtils.getPrefString(XXService.this,
+                PreferenceConstants.PASSWORD, "");
+        if (TextUtils.isEmpty(account) || TextUtils.isEmpty(password))// 如果没有帐号，也直接返回
+            return;
+        if (!PreferenceUtils.getPrefBoolean(this,
+                PreferenceConstants.AUTO_RECONNECT, true))// 不需要重连
+            return;
+        Login(account, password);// 重连
+    }
 
 	@Override
 	public void activityOnResume() {
@@ -610,4 +657,31 @@ public class XXService extends BaseService implements EventHandler,
     public int PatientCall(String message){
         return getResources().getIdentifier("call"+message,"raw",this.getPackageName());
     }
+    //tchl 1109 begin
+
+    class MyHandler extends Handler {
+        public MyHandler() {
+        }
+
+        public MyHandler(Looper L) {
+            super(L);
+        }
+
+        // 必须重写这个方法，用于处理message
+        @Override
+        public void handleMessage(Message msg) {
+            // 这里用于更新UI
+            Bundle b = msg.getData();
+            String color = b.getString("color");
+            //MyHandlerActivity.this.textView.setText(color);
+        }
+    }
+
+    Runnable HandleThreadRun = new Runnable() {
+        @Override
+        public void run() {
+                ;//mSubHandler.sendEmptyMessage(0);
+        }
+    };
+    //tchl 1109 end
 }
